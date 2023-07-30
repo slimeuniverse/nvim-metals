@@ -19,6 +19,17 @@ local finders = require("telescope.finders")
 local themes = require("telescope.themes")
 local pickers = require("telescope.pickers")
 
+local user_opts
+local setup = function(opts)
+  if opts.theme and opts.theme ~= "" then
+    user_opts = themes["get_" .. opts.theme](opts)
+  else
+    user_opts = themes.get_dropdown({
+      previewer = false,
+    })
+  end
+end
+
 local function execute_command(bufnr)
   local selection = action_state.get_selected_entry(bufnr)
   actions.close(bufnr)
@@ -71,9 +82,7 @@ local function get_max_width(commands)
 end
 
 local function commands(opts)
-  opts = opts or themes.get_dropdown({
-    previewer = false,
-  })
+  opts = vim.tbl_extend("force", user_opts, opts or {})
 
   pickers
     .new(opts, {
@@ -98,6 +107,7 @@ local function commands(opts)
 end
 
 return telescope.register_extension({
+  setup = setup,
   exports = {
     commands = commands,
   },
